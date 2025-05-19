@@ -13,7 +13,7 @@ import { Project } from '../../project/entities/project.entity';
 import { Task } from '../../task/entities/task.entity';
 import { WorkingTime } from '../entities/working-time.entity';
 import { ERROR_MESSAGES } from '~/common/constants/error_messages';
-
+import { ComplaintStatusType, StatusType } from '../enums/statustype.enum';
 @Injectable()
 export class TimesheetService {
   constructor(
@@ -52,7 +52,7 @@ export class TimesheetService {
     Object.assign(timesheet, {
       user,
       date: createTimesheetDto.date,
-      status: 'pending',
+      status: StatusType.PENDING,
       punishment_money: 0,
     });
 
@@ -70,7 +70,7 @@ export class TimesheetService {
     const workingTime = await this.workingTimeRepository.findOne({
       where: {
         user: { id: userId },
-        status: 'approve',
+        status: StatusType.APPROVED,
         apply_date: LessThanOrEqual(new Date()),
       },
       order: { apply_date: 'DESC' },
@@ -125,7 +125,7 @@ export class TimesheetService {
     const workingTime = await this.workingTimeRepository.findOne({
       where: {
         user: { id: userId },
-        status: 'approve',
+        status: StatusType.APPROVED,
         apply_date: LessThanOrEqual(new Date()),
       },
       order: { apply_date: 'DESC' },
@@ -180,7 +180,7 @@ export class TimesheetService {
     }
 
     // Only allow updates if status is pending
-    if (timesheet.status !== 'pending') {
+    if (timesheet.status !== StatusType.PENDING) {
       throw new BadRequestException(ERROR_MESSAGES.TIMESHEET_NOT_UPDATED);
     }
 
@@ -298,11 +298,11 @@ export class TimesheetService {
       throw new NotFoundException(ERROR_MESSAGES.USER_NOT_FOUND);
     }
 
-    if (timesheet.status !== 'pending') {
+    if (timesheet.status !== StatusType.PENDING) {
       throw new BadRequestException(ERROR_MESSAGES.TIMESHEET_NOT_UPDATED);
     }
 
-    timesheet.status = 'submit';
+    timesheet.status = StatusType.SUBMITTED;
     timesheet.updatedBy = user;
 
     return await this.timesheetRepository.save(timesheet);
@@ -315,11 +315,11 @@ export class TimesheetService {
       throw new NotFoundException(ERROR_MESSAGES.USER_NOT_FOUND);
     }
 
-    if (timesheet.status !== 'submit') {
+    if (timesheet.status !== StatusType.SUBMITTED) {
       throw new BadRequestException(ERROR_MESSAGES.TIMESHEET_NOT_UPDATED);
     }
 
-    timesheet.status = 'approve';
+    timesheet.status = StatusType.APPROVED;
     timesheet.approvedBy = user;
     timesheet.approved_at = new Date();
     timesheet.updatedBy = user;
@@ -338,11 +338,11 @@ export class TimesheetService {
       throw new NotFoundException(ERROR_MESSAGES.USER_NOT_FOUND);
     }
 
-    if (timesheet.status !== 'submit') {
+    if (timesheet.status !== StatusType.SUBMITTED) {
       throw new BadRequestException(ERROR_MESSAGES.TIMESHEET_NOT_UPDATED);
     }
 
-    timesheet.status = 'reject';
+    timesheet.status = StatusType.REJECTED;
     timesheet.note = reason;
     timesheet.updatedBy = user;
 
@@ -360,14 +360,14 @@ export class TimesheetService {
       throw new NotFoundException(ERROR_MESSAGES.USER_NOT_FOUND);
     }
 
-    if (timesheet.status !== 'reject') {
+    if (timesheet.status !== StatusType.REJECTED) {
       throw new BadRequestException(
         ERROR_MESSAGES.CAN_ONLY_CREATE_COMPLAINTS_FOR_REJECTED_TIMESHEETS,
       );
     }
 
     timesheet.complaint = content;
-    timesheet.complaint_status = 'pending';
+    timesheet.complaint_status = ComplaintStatusType.PENDING;
     timesheet.updatedBy = user;
 
     return await this.timesheetRepository.save(timesheet);
@@ -391,7 +391,7 @@ export class TimesheetService {
     timesheet.complaint_reply = content;
     timesheet.complaintRepliedBy = user;
     timesheet.complaint_replied_at = new Date();
-    timesheet.complaint_status = 'replied';
+    timesheet.complaint_status = ComplaintStatusType.REPLIED;
     timesheet.updatedBy = user;
 
     return await this.timesheetRepository.save(timesheet);

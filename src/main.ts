@@ -33,7 +33,7 @@ async function bootstrap(): Promise<void> {
         }
 
         return new BadRequestException({
-          message: ERROR_MESSAGES.BadRequest,
+          message: ERROR_MESSAGES.BAD_REQUEST,
           errorList,
         });
       },

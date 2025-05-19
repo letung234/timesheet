@@ -12,7 +12,6 @@ import {
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
-import { AuthResponseDto } from './dto/auth-response.dto';
 import { Public } from './decorators/public.decorator';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { ChangePasswordDto } from './dto/change-password.dto';
@@ -25,8 +24,13 @@ export class AuthController {
   @Public()
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  async login(@Body() loginDto: LoginDto): Promise<AuthResponseDto> {
-    return this.authService.login(loginDto);
+  async login(@Body() loginDto: LoginDto){
+    const data = await this.authService.login(loginDto);
+    return {
+      message: 'Logged in successfully',
+      data,
+      statusCode: HttpStatus.OK,
+    };
   }
 
   @Public()
@@ -34,15 +38,24 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async refreshToken(
     @Body() refreshTokenDto: RefreshTokenDto,
-  ): Promise<AuthResponseDto> {
-    return this.authService.refreshToken(refreshTokenDto);
+  ) {
+    const data = await this.authService.refreshToken(refreshTokenDto);
+    return {
+      message: 'Token refreshed successfully',
+      data,
+      statusCode: HttpStatus.OK,
+    };
   }
 
   @UseGuards(JwtAuthGuard)
   @Post('logout')
   @HttpCode(HttpStatus.OK)
-  async logout(@Body() refreshTokenDto: RefreshTokenDto): Promise<void> {
+  async logout(@Body() refreshTokenDto: RefreshTokenDto) {
     await this.authService.logout(refreshTokenDto.refreshToken);
+    return {
+      message: 'Logged out successfully',
+      statusCode: HttpStatus.OK,
+    };
   }
 
   @UseGuards(JwtAuthGuard)
@@ -51,7 +64,7 @@ export class AuthController {
   async changePassword(
     @Request() req,
     @Body() changePasswordDto: ChangePasswordDto,
-  ): Promise<void> {
+  ){
     if (!req.user?.id) {
       throw new UnauthorizedException(ERROR_MESSAGES.USER_NOT_AUTHENTICATED);
     }
@@ -60,5 +73,9 @@ export class AuthController {
       changePasswordDto.oldPassword,
       changePasswordDto.newPassword,
     );
+    return {
+      message: 'Password changed successfully',
+      statusCode: HttpStatus.OK,
+    };
   }
 }

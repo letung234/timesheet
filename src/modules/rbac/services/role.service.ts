@@ -43,7 +43,7 @@ export class RoleService {
     });
 
     if (!role) {
-      throw new NotFoundException(ERROR_MESSAGES.roleNotFound);
+      throw new NotFoundException(ERROR_MESSAGES.ROLE_NOT_FOUND);
     }
 
     return role;
@@ -100,13 +100,13 @@ export class RoleService {
   async assignRoleToUser(userId: number, roleId: number): Promise<void> {
     const role = await this.findOne(roleId);
     if (!role) {
-      throw new NotFoundException(ERROR_MESSAGES.roleNotFound);
+      throw new NotFoundException(ERROR_MESSAGES.ROLE_NOT_FOUND);
     }
     const user = await this.userRepository.findOne({
       where: { id: userId },
     });
     if (!user) {
-      throw new NotFoundException(ERROR_MESSAGES.userNotFound);
+      throw new NotFoundException(ERROR_MESSAGES.USER_NOT_FOUND);
     }
     const userRole = this.userRoleRepository.create({
       user_id: userId,
@@ -118,13 +118,13 @@ export class RoleService {
   async removeRoleFromUser(userId: number, roleId: number): Promise<void> {
     const role = await this.findOne(roleId);
     if (!role) {
-      throw new NotFoundException(ERROR_MESSAGES.roleNotFound);
+      throw new NotFoundException(ERROR_MESSAGES.ROLE_NOT_FOUND);
     }
     const user = await this.userRepository.findOne({
       where: { id: userId },
     });
     if (!user) {
-      throw new NotFoundException(ERROR_MESSAGES.userNotFound);
+      throw new NotFoundException(ERROR_MESSAGES.USER_NOT_FOUND);
     }
     await this.userRoleRepository.delete({
       user_id: userId,

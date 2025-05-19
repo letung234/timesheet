@@ -28,7 +28,7 @@ export class PermissionService {
     });
 
     if (!permission) {
-      throw new NotFoundException(ERROR_MESSAGES.permissionNotFound);
+      throw new NotFoundException(ERROR_MESSAGES.PERMISSION_NOT_FOUND);
     }
     return permission;
   }
@@ -39,7 +39,7 @@ export class PermissionService {
     });
 
     if (!permission) {
-      throw new NotFoundException(ERROR_MESSAGES.permissionNotFound);
+      throw new NotFoundException(ERROR_MESSAGES.PERMISSION_NOT_FOUND);
     }
 
     return permission;

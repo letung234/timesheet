@@ -5,6 +5,7 @@ export class UserResponseDto {
   email: string;
   fullname: string;
   permissions: string[];
+  type: string;
 }
 
 export class AuthResponseDto {

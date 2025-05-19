@@ -12,49 +12,49 @@ import { User } from '~/modules/users/entities/user.entity';
 @Entity('working_time')
 export class WorkingTime {
   @PrimaryGeneratedColumn()
-  id: number; // Khóa chính
+  id: number;
 
-  @ManyToOne(() => User, (user) => user.id) // Mối quan hệ với bảng users
+  @ManyToOne(() => User, (user) => user.id)
   @JoinColumn({ name: 'user_id' })
-  user: User; // Người dùng liên quan đến ca làm việc
+  user: User;
 
   @Column()
-  name: string; // Tên ca làm việc
+  name: string;
 
   @Column('text', { nullable: true })
-  description: string; // Mô tả chi tiết, nullable để có thể không có giá trị
+  description: string;
 
   @Column({ type: 'time' })
-  start_morning_time: string; // Giờ bắt đầu buổi sáng
+  start_morning_time: string;
 
   @Column({ type: 'time' })
-  end_morning_time: string; // Giờ kết thúc buổi sáng
+  end_morning_time: string;
 
   @Column({ type: 'time' })
-  start_afternoon_time: string; // Giờ bắt đầu buổi chiều
+  start_afternoon_time: string;
 
   @Column({ type: 'time' })
-  end_afternoon_time: string; // Giờ kết thúc buổi chiều
+  end_afternoon_time: string;
 
   @Column({ type: 'timestamp' })
-  request_time: Date; // Thời gian yêu cầu
+  request_time: Date;
 
   @Column({ type: 'date' })
-  apply_date: Date; // Ngày áp dụng
+  apply_date: Date;
 
-  @ManyToOne(() => User, (user) => user.id, { nullable: true }) // Người duyệt (nullable)
+  @ManyToOne(() => User, (user) => user.id, { nullable: true })
   @JoinColumn({ name: 'approved_by' })
-  approved_by: User; // Người duyệt
+  approved_by: User;
 
   @Column({ type: 'timestamp', nullable: true })
-  approved_at: Date; // Thời gian duyệt
+  approved_at: Date;
 
   @Column()
-  status: string; // Trạng thái (pending/approved/rejected)
+  status: string;
 
   @CreateDateColumn({ type: 'timestamp' })
-  created_at: Date; // Thời gian tạo
+  created_at: Date;
 
   @UpdateDateColumn({ type: 'timestamp' })
-  updated_at: Date; // Thời gian cập nhật
+  updated_at: Date;
 }

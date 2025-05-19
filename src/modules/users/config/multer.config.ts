@@ -8,7 +8,7 @@ export const multerConfig: MulterOptions = {
   },
   fileFilter: (req, file, cb) => {
     if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
-      return cb(new Error(ERROR_MESSAGES.invalidFileFormat), false);
+      return cb(new Error(ERROR_MESSAGES.INVALID_FILE_FORMAT), false);
     }
     cb(null, true);
   },

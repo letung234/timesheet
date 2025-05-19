@@ -46,7 +46,11 @@ export class TaskService {
 
   async create(userId: number, createTaskDto: CreateTaskDto): Promise<Task> {
     // Check if user has permission to create task in the project
-    await this.checkProjectPermission(userId, createTaskDto.project_id, ProjectRole.MANAGER);
+    await this.checkProjectPermission(
+      userId,
+      createTaskDto.project_id,
+      ProjectRole.MANAGER,
+    );
 
     // Check if project exists and is active
     const project = await this.projectRepository.findOne({
@@ -114,7 +118,11 @@ export class TaskService {
     const task = await this.findOne(id);
 
     // Check if user has permission to update task in the project
-    await this.checkProjectPermission(userId, task.project_id, ProjectRole.MANAGER);
+    await this.checkProjectPermission(
+      userId,
+      task.project_id,
+      ProjectRole.MANAGER,
+    );
 
     // Check if assignee exists if provided
     if (updateTaskDto.assignee_id) {

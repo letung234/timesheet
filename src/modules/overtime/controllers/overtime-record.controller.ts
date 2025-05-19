@@ -8,6 +8,7 @@ import {
   Delete,
   UseGuards,
   Request,
+  HttpStatus,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '~/modules/auth/guards/jwt-auth.guard';
 import { PermissionsGuard } from '~/modules/auth/guards/permissions.guard';
@@ -24,59 +25,88 @@ export class OvertimeRecordController {
 
   @Post()
   @RequirePermissions(Permission.CREATE_OVERTIME)
-  create(
+  async create(
     @Request() req,
     @Body() createOvertimeRecordDto: CreateOvertimeRecordDto,
   ) {
-    return this.overtimeRecordService.create(
+    const data = await this.overtimeRecordService.create(
       req.user.id,
       createOvertimeRecordDto,
     );
+    return {
+      message: 'Overtime record created successfully',
+      data,
+      statusCode: HttpStatus.OK,
+    };
   }
 
   @Get()
   @RequirePermissions(Permission.READ_OVERTIME)
-  findAll(@Request() req) {
-    return this.overtimeRecordService.findAll(req.user.id);
+  async findAll(@Request() req) {
+    const data = await this.overtimeRecordService.findAll(req.user.id);
+    return {
+      message: 'Overtime records retrieved successfully',
+      data,
+      statusCode: HttpStatus.OK,
+    };
   }
 
   @Get(':id')
   @RequirePermissions(Permission.READ_OVERTIME)
-  findOne(@Request() req, @Param('id') id: string) {
-    return this.overtimeRecordService.findOne(+id, req.user.id);
+  async findOne(@Request() req, @Param('id') id: string) {
+    const data = await this.overtimeRecordService.findOne(+id, req.user.id);
+    return {
+      message: 'Overtime record retrieved successfully',
+      data,
+      statusCode: HttpStatus.OK,
+    };
   }
 
   @Patch(':id')
   @RequirePermissions(Permission.UPDATE_OVERTIME)
-  update(
+  async update(
     @Request() req,
     @Param('id') id: string,
     @Body() updateOvertimeRecordDto: UpdateOvertimeRecordDto,
   ) {
-    return this.overtimeRecordService.update(
+    const data = await this.overtimeRecordService.update(
       req.user.id,
       +id,
       updateOvertimeRecordDto,
     );
+    return {
+      message: 'Overtime record updated successfully',
+      data,
+      statusCode: HttpStatus.OK,
+    };
   }
 
   @Delete(':id')
   @RequirePermissions(Permission.DELETE_OVERTIME)
-  remove(@Request() req, @Param('id') id: string) {
-    return this.overtimeRecordService.remove(req.user.id, +id);
+  async remove(@Request() req, @Param('id') id: string) {
+    await this.overtimeRecordService.remove(req.user.id, +id);
+    return {
+      message: 'Overtime record deleted successfully',
+      statusCode: HttpStatus.OK,
+    };
   }
 
   @Patch(':id/approve')
   @RequirePermissions(Permission.APPROVE_OVERTIME)
-  approve(
+  async approve(
     @Request() req,
     @Param('id') id: string,
     @Body('rejectionReason') rejectionReason?: string,
   ) {
-    return this.overtimeRecordService.approve(
+    const data = await this.overtimeRecordService.approve(
       req.user.id,
       +id,
       rejectionReason,
     );
+    return {
+      message: 'Overtime record approved successfully',
+      data,
+      statusCode: HttpStatus.OK,
+    };
   }
 }

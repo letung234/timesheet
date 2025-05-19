@@ -8,6 +8,7 @@ import {
   Delete,
   UseGuards,
   Request,
+  HttpStatus,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../../auth/guards/permissions.guard';
@@ -24,35 +25,63 @@ export class BranchController {
 
   @Post()
   @RequirePermissions(Permission.CREATE_BRANCH)
-  create(@Request() req, @Body() createBranchDto: CreateBranchDto) {
-    return this.branchService.create(req.user.id, createBranchDto);
+  async create(@Request() req, @Body() createBranchDto: CreateBranchDto) {
+    const data = await this.branchService.create(req.user.id, createBranchDto);
+    return {
+      message: 'Branch created successfully',
+      data,
+      statusCode: HttpStatus.OK,
+    };
   }
 
   @Get()
   @RequirePermissions(Permission.READ_BRANCH)
-  findAll() {
-    return this.branchService.findAll();
+  async findAll() {
+    const data = await this.branchService.findAll();
+    return {
+      message: 'Branches retrieved successfully',
+      data,
+      statusCode: HttpStatus.OK,
+    };
   }
 
   @Get(':id')
   @RequirePermissions(Permission.READ_BRANCH)
-  findOne(@Param('id') id: string) {
-    return this.branchService.findOne(+id);
+  async findOne(@Param('id') id: string) {
+    const data = await this.branchService.findOne(+id);
+    return {
+      message: 'Branch retrieved successfully',
+      data,
+      statusCode: HttpStatus.OK,
+    };
   }
 
   @Patch(':id')
   @RequirePermissions(Permission.UPDATE_BRANCH)
-  update(
+  async update(
     @Request() req,
     @Param('id') id: string,
     @Body() updateBranchDto: UpdateBranchDto,
   ) {
-    return this.branchService.update(req.user.id, +id, updateBranchDto);
+    const data = await this.branchService.update(
+      req.user.id,
+      +id,
+      updateBranchDto,
+    );
+    return {
+      message: 'Branch updated successfully',
+      data,
+      statusCode: HttpStatus.OK,
+    };
   }
 
   @Delete(':id')
   @RequirePermissions(Permission.DELETE_BRANCH)
-  remove(@Request() req, @Param('id') id: string) {
-    return this.branchService.remove(req.user.id, +id);
+  async remove(@Request() req, @Param('id') id: string) {
+    await this.branchService.remove(req.user.id, +id);
+    return {
+      message: 'Branch deleted successfully',
+      statusCode: HttpStatus.OK,
+    };
   }
 }

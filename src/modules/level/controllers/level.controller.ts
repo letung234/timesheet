@@ -8,6 +8,7 @@ import {
   Delete,
   UseGuards,
   Request,
+  HttpStatus,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../../auth/guards/permissions.guard';
@@ -24,35 +25,59 @@ export class LevelController {
 
   @Post()
   @RequirePermissions(Permission.CREATE_LEVEL)
-  create(@Request() req, @Body() createLevelDto: CreateLevelDto) {
-    return this.levelService.create(req.user.id, createLevelDto);
+  async create(@Request() req, @Body() createLevelDto: CreateLevelDto) {
+    const data = await this.levelService.create(req.user.id, createLevelDto);
+    return {
+      message: 'Level created successfully',
+      data,
+      statusCode: HttpStatus.OK,
+    };
   }
 
   @Get()
   @RequirePermissions(Permission.READ_LEVEL)
-  findAll() {
-    return this.levelService.findAll();
+  async findAll() {
+    const data = await this.levelService.findAll();
+    return {
+      message: 'Levels retrieved successfully',
+      data,
+      statusCode: HttpStatus.OK,
+    };
   }
 
   @Get(':id')
   @RequirePermissions(Permission.READ_LEVEL)
-  findOne(@Param('id') id: string) {
-    return this.levelService.findOne(+id);
+  async findOne(@Param('id') id: string) {
+    const data = await this.levelService.findOne(+id);
+    return {
+      message: 'Level retrieved successfully',
+      data,
+      statusCode: HttpStatus.OK,
+    };
   }
 
   @Patch(':id')
   @RequirePermissions(Permission.UPDATE_LEVEL)
-  update(
+  async update(
     @Request() req,
     @Param('id') id: string,
     @Body() updateLevelDto: UpdateLevelDto,
   ) {
-    return this.levelService.update(req.user.id, +id, updateLevelDto);
+    const data = await this.levelService.update(req.user.id, +id, updateLevelDto);
+    return {
+      message: 'Level updated successfully',
+      data,
+      statusCode: HttpStatus.OK,
+    };
   }
 
   @Delete(':id')
   @RequirePermissions(Permission.DELETE_LEVEL)
-  remove(@Request() req, @Param('id') id: string) {
-    return this.levelService.remove(req.user.id, +id);
+  async remove(@Request() req, @Param('id') id: string) {
+    await this.levelService.remove(req.user.id, +id);
+    return {
+      message: 'Level deleted successfully',
+      statusCode: HttpStatus.OK,
+    };
   }
 }

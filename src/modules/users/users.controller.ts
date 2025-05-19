@@ -27,7 +27,7 @@ import { RequirePermissions } from '../auth/decorators/require-permissions.decor
 import { Permission } from '../auth/enums/permissions.enum';
 import { multerConfig } from './config/multer.config';
 import { PermissionsGuard } from '~/modules/auth/guards/permissions.guard';
-import { ERROR_MESSAGES } from '~/common/constants/error_messages';import { FindUsersOptions } from './interfaces/find-users.interface';
+import { ERROR_MESSAGES } from '~/common/constants/error_messages';
 import { FindUsersQueryDto } from './dto/query.dto';
 @Controller('users')
 @UseGuards(JwtAuthGuard, PermissionsGuard)
@@ -62,7 +62,7 @@ export class UsersController {
     const data = await this.usersService.findById(params.id);
     if (!data) {
       throw new HttpException(
-        { message: ERROR_MESSAGES.userNotFound },
+        { message: ERROR_MESSAGES.USER_NOT_FOUND },
         HttpStatus.NOT_FOUND,
       );
     }
@@ -102,7 +102,12 @@ export class UsersController {
     @Param('id') id: string,
     @UploadedFile() file: Express.Multer.File,
   ) {
-    return this.usersService.uploadAvatar(+id, file);
+    const data = await this.usersService.uploadAvatar(+id, file);
+    return {
+      message: 'Upload avatar successfully',
+      data,
+      statusCode: HttpStatus.OK,
+    };
   }
 
   @Delete(':id/avatar')
@@ -110,11 +115,20 @@ export class UsersController {
   @RequirePermissions(Permission.UPDATE_USER)
   async removeAvatar(@Param('id') id: string) {
     await this.usersService.removeAvatar(+id);
+    return {
+      message: 'Remove avatar successfully',
+      statusCode: HttpStatus.OK,
+    };
   }
 
   @Patch(':id/toggle-active')
   @RequirePermissions(Permission.TOGGLE_USER_ACTIVE)
   async toggleActive(@Param('id') id: string) {
-    return this.usersService.toggleActive(+id);
+    const data = await this.usersService.toggleActive(+id);
+    return {
+      message: 'Toggle active successfully',
+      data,
+      statusCode: HttpStatus.OK,
+    };
   }
 }

@@ -16,7 +16,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   ) {
     const secret = configService.get<string>('jwt.secret');
     if (!secret) {
-      throw new Error(ERROR_MESSAGES.jwtSecretNotDefined);
+      throw new Error(ERROR_MESSAGES.JWT_SECRET_NOT_DEFINED);
     }
 
     super({
@@ -29,10 +29,13 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   async validate(payload: UserResponseDto): Promise<UserResponseDto> {
     const user = await this.usersService.findById(payload.id);
     if (!user) {
-      throw new UnauthorizedException(ERROR_MESSAGES.userNotFound);
+      throw new UnauthorizedException(ERROR_MESSAGES.USER_NOT_FOUND);
     }
-    const permissions = await this.permissionService.getPermissionsNameByUserId(user.id);
+    const permissions = await this.permissionService.getPermissionsNameByUserId(
+      user.id,
+    );
     return {
+      type: payload.type,
       id: user.id,
       email: user.email,
       fullname: user.fullname,

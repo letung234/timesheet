@@ -10,7 +10,7 @@ import {
 import { User } from '~/modules/users/entities/user.entity';
 import { Task } from '../../task/entities/task.entity';
 import { Project } from '../../project/entities/project.entity';
-
+import { StatusType } from '../enums/statustype.enum';
 @Entity('daily_attendances')
 export class DailyAttendance {
   @PrimaryGeneratedColumn()
@@ -65,8 +65,8 @@ export class DailyAttendance {
   @JoinColumn({ name: 'updated_by' })
   updatedBy: User;
 
-  @Column({ type: 'varchar' })
-  status: string;
+  @Column({ type: 'enum', enum: StatusType, default: StatusType.PENDING })
+  status: StatusType;
 
   @Column({ type: 'int', nullable: true })
   request_id: number;

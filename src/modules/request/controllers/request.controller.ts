@@ -9,6 +9,7 @@ import {
   UseGuards,
   Query,
   Request,
+  HttpStatus,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../../auth/guards/permissions.guard';
@@ -25,55 +26,87 @@ export class RequestController {
 
   @Post()
   @RequirePermissions(Permission.CREATE_REQUEST)
-  create(@Request() req, @Body() createRequestDto: CreateRequestDto) {
-    return this.requestService.create(req.user.id, createRequestDto);
+  async create(@Request() req, @Body() createRequestDto: CreateRequestDto) {
+    const data = await this.requestService.create(req.user.id, createRequestDto);
+    return {
+      message: 'Create request successfully',
+      data,
+      statusCode: HttpStatus.OK,
+    };
   }
 
   @Get()
   @RequirePermissions(Permission.READ_REQUEST)
-  findAll(
+  async findAll(
     @Request() req,
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
   ) {
-    return this.requestService.findAll(req.user.id, startDate, endDate);
+    const data = await this.requestService.findAll(req.user.id, startDate, endDate);
+    return {
+      message: 'Get requests successfully',
+      data,
+      statusCode: HttpStatus.OK,
+    };
   }
 
   @Get(':id')
   @RequirePermissions(Permission.READ_REQUEST)
-  findOne(@Request() req, @Param('id') id: string) {
-    return this.requestService.findOne(+id, req.user.id);
+  async findOne(@Request() req, @Param('id') id: string) {
+    const data = await this.requestService.findOne(+id, req.user.id);
+    return {
+      message: 'Get request successfully',
+      data,
+      statusCode: HttpStatus.OK,
+    };
   }
 
   @Patch(':id')
   @RequirePermissions(Permission.UPDATE_REQUEST)
-  update(
+  async update(
     @Request() req,
     @Param('id') id: string,
     @Body() updateRequestDto: UpdateRequestDto,
   ) {
-    return this.requestService.update(req.user.id, +id, updateRequestDto);
+    const data = await this.requestService.update(req.user.id, +id, updateRequestDto);
+    return {
+      message: 'Update request successfully',
+      data,
+      statusCode: HttpStatus.OK,
+    };
   }
 
   @Post(':id/approve')
   @RequirePermissions(Permission.APPROVE_REQUEST)
-  approve(@Request() req, @Param('id') id: string) {
-    return this.requestService.approve(req.user.id, +id);
+  async approve(@Request() req, @Param('id') id: string) {
+    await this.requestService.approve(req.user.id, +id);
+    return {
+      message: 'Approve request successfully',
+      statusCode: HttpStatus.OK,
+    };
   }
 
   @Post(':id/reject')
   @RequirePermissions(Permission.APPROVE_REQUEST)
-  reject(
+  async reject(
     @Request() req,
     @Param('id') id: string,
     @Body('reason') reason: string,
   ) {
-    return this.requestService.approve(req.user.id, +id, reason);
+    await this.requestService.approve(req.user.id, +id, reason);
+    return {
+      message: 'Approve request successfully',
+      statusCode: HttpStatus.OK,
+    };
   }
 
   @Post(':id/cancel')
   @RequirePermissions(Permission.UPDATE_REQUEST)
-  cancel(@Request() req, @Param('id') id: string) {
-    return this.requestService.cancel(req.user.id, +id);
+  async cancel(@Request() req, @Param('id') id: string) {
+    await this.requestService.cancel(req.user.id, +id);
+    return {
+      message: 'Cancel request successfully',
+      statusCode: HttpStatus.OK,
+    };
   }
 }

@@ -8,6 +8,7 @@ import {
   Delete,
   UseGuards,
   Request,
+  HttpStatus,
 } from '@nestjs/common';
 import { TaskService } from '../services/task.service';
 import { CreateTaskDto } from '../dto/create-task.dto';
@@ -24,58 +25,91 @@ export class TaskController {
 
   @Post()
   @RequirePermissions(Permission.CREATE_TASK)
-  create(
+  async create(
     @Request() req,
     @Param('projectCode') projectCode: string,
     @Body() createTaskDto: CreateTaskDto,
   ) {
-    return this.taskService.create(req.user.id, {
+    const data = await this.taskService.create(req.user.id, {
       ...createTaskDto,
       project_id: projectCode,
     });
+    return {
+      message: 'Create task successfully',
+      data,
+      statusCode: HttpStatus.OK,
+    };
   }
 
   @Get()
   @RequirePermissions(Permission.READ_TASK)
-  findAll(@Param('projectCode') projectCode: string) {
-    return this.taskService.findAll(projectCode);
+  async findAll(@Param('projectCode') projectCode: string) {
+    const data = await this.taskService.findAll(projectCode);
+    return {
+      message: 'Get tasks successfully',
+      data,
+      statusCode: HttpStatus.OK,
+    };
   }
 
   @Get(':id')
   @RequirePermissions(Permission.READ_TASK)
-  findOne(@Param('id') id: string) {
-    return this.taskService.findOne(+id);
+  async findOne(@Param('id') id: string) {
+    const data = await this.taskService.findOne(+id);
+    return {
+      message: 'Get task successfully',
+      data,
+      statusCode: HttpStatus.OK,
+    };
   }
 
   @Patch(':id')
   @RequirePermissions(Permission.UPDATE_TASK)
-  update(
+  async update(
     @Request() req,
     @Param('id') id: string,
     @Body() updateTaskDto: UpdateTaskDto,
   ) {
-    return this.taskService.update(req.user.id, +id, updateTaskDto);
+    const data = await this.taskService.update(req.user.id, +id, updateTaskDto);
+    return {
+      message: 'Update task successfully',
+      data,
+      statusCode: HttpStatus.OK,
+    };
   }
 
   @Delete(':id')
   @RequirePermissions(Permission.DELETE_TASK)
-  remove(@Request() req, @Param('id') id: string) {
-    return this.taskService.remove(req.user.id, +id);
+  async remove(@Request() req, @Param('id') id: string) {
+    await this.taskService.remove(req.user.id, +id);
+    return {
+      message: 'Delete task successfully',
+      statusCode: HttpStatus.OK,
+    };
   }
 
   @Post(':id/assign')
   @RequirePermissions(Permission.ASSIGN_TASK)
-  assignTask(
+  async assignTask(
     @Request() req,
     @Param('id') id: string,
     @Body('userId') userId: number,
   ) {
-    return this.taskService.assignTask(req.user.id, +id, userId);
+    await this.taskService.assignTask(req.user.id, +id, userId);
+    return {
+      message: 'Assign task successfully',
+      statusCode: HttpStatus.OK,
+    };
   }
 
   @Get('user/:userId')
   @RequirePermissions(Permission.READ_TASK)
-  getUserTasks(@Param('userId') userId: string) {
-    return this.taskService.getUserTasks(+userId);
+  async getUserTasks(@Param('userId') userId: string) {
+    const data = await this.taskService.getUserTasks(+userId);
+    return {
+      message: 'Get user tasks successfully',
+      data,
+      statusCode: HttpStatus.OK,
+    };
   }
 }

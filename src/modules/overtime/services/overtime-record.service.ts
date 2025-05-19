@@ -13,6 +13,7 @@ import { UpdateOvertimeRecordDto } from '../dto/update-overtime-record.dto';
 import { ERROR_MESSAGES } from '~/common/constants/error_messages';
 import { ProjectService } from '../../project/services/project.service';
 import { ProjectRole } from '../../project/enums/project-role.enum';
+import { StatusType } from '../enums/statustype.enum';
 
 @Injectable()
 export class OvertimeRecordService {
@@ -45,7 +46,7 @@ export class OvertimeRecordService {
     );
 
     if (!isProjectMember) {
-      throw new ForbiddenException(ERROR_MESSAGES.insufficientPermissions);
+      throw new ForbiddenException(ERROR_MESSAGES.INSUFFICIENT_PERMISSIONS);
     }
 
     // Validate time
@@ -68,7 +69,7 @@ export class OvertimeRecordService {
       user_id: userId,
       created_by: userId,
       total_hours: totalHours,
-      status: 'PENDING',
+      status: StatusType.PENDING,
     });
 
     return this.overtimeRecordRepository.save(overtimeRecord);
@@ -97,7 +98,7 @@ export class OvertimeRecordService {
       !(await this.isProjectManager(userId, overtimeRecord.project_code)) &&
       !(await this.isProjectAdmin(userId, overtimeRecord.project_code))
     ) {
-      throw new ForbiddenException(ERROR_MESSAGES.insufficientPermissions);
+      throw new ForbiddenException(ERROR_MESSAGES.INSUFFICIENT_PERMISSIONS);
     }
 
     return overtimeRecord;
@@ -116,7 +117,7 @@ export class OvertimeRecordService {
     }
 
     // Cannot update if already approved or rejected
-    if (overtimeRecord.status !== 'PENDING') {
+    if (overtimeRecord.status !== StatusType.PENDING) {
       throw new BadRequestException(
         ERROR_MESSAGES.CANNOT_UPDATE_NON_PENDING_RECORD,
       );
@@ -163,7 +164,7 @@ export class OvertimeRecordService {
     }
 
     // Cannot delete if already approved or rejected
-    if (overtimeRecord.status !== 'PENDING') {
+    if (overtimeRecord.status !== StatusType.PENDING) {
       throw new BadRequestException(
         ERROR_MESSAGES.CANNOT_DELETE_NON_PENDING_RECORD,
       );
@@ -194,11 +195,13 @@ export class OvertimeRecordService {
     }
 
     // Check if record is pending
-    if (overtimeRecord.status !== 'PENDING') {
+    if (overtimeRecord.status !== StatusType.PENDING) {
       throw new BadRequestException(ERROR_MESSAGES.RECORD_NOT_PENDING);
     }
 
-    overtimeRecord.status = rejectionReason ? 'REJECTED' : 'APPROVED';
+    overtimeRecord.status = rejectionReason
+      ? StatusType.REJECTED
+      : StatusType.APPROVED;
     overtimeRecord.rejection_reason = rejectionReason || null;
     overtimeRecord.approver_id = userId;
     overtimeRecord.updated_by = userId;

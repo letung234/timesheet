@@ -11,9 +11,9 @@ import {
   OneToMany,
   JoinTable,
 } from 'typeorm';
-import { Branch } from './branch.entity';
-import { Level } from './level.entity';
-import { Position } from './position.entity';
+import { Branch } from '~/modules/branch/entities/branch.entity';
+import { Level } from '~/modules/level/entities/level.entity';
+import { Position } from '~/modules/position/entities/position.entity';
 import { Role } from '~/modules/auth/entities/role.entity';
 import { UserRole } from '~/modules/auth/entities/user-role.entity';
 import { DailyAttendance } from '~/modules/timesheet/entities/daily_attendance.entity';

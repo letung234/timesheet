@@ -18,7 +18,7 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
   ): Promise<Omit<User, 'password'>> {
     const user = await this.authService.validateUser(email, password);
     if (!user) {
-      throw new UnauthorizedException(ERROR_MESSAGES.invalidCredentials);
+      throw new UnauthorizedException(ERROR_MESSAGES.INVALID_CREDENTIALS);
     }
     return user;
   }

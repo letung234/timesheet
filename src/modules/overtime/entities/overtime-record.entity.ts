@@ -10,7 +10,7 @@ import {
 import { User } from '../../users/entities/user.entity';
 import { DailyAttendance } from '../../timesheet/entities/daily_attendance.entity';
 import { Project } from '../../project/entities/project.entity';
-
+import { StatusType } from '../enums/statustype.enum';
 @Entity('overtime_records')
 export class OvertimeRecord {
   @PrimaryGeneratedColumn()
@@ -44,8 +44,8 @@ export class OvertimeRecord {
 
   @Column({
     type: 'enum',
-    enum: ['PENDING', 'APPROVED', 'REJECTED'],
-    default: 'PENDING',
+    enum: StatusType,
+    default: StatusType.PENDING,
   })
   status: string;
 

@@ -16,6 +16,7 @@ import { RefreshTokenService } from '../refresh-token/refresh-token.service';
 import { User } from '../users/entities/user.entity';
 import { ERROR_MESSAGES } from '~/common/constants/error_messages';
 import { PermissionService } from '../rbac/services/permission.service';
+import { TypeToken } from './enums/typetoken.enum';
 @Injectable()
 export class AuthService {
   private readonly MAX_LOGIN_ATTEMPTS = 5;
@@ -62,7 +63,6 @@ export class AuthService {
     email: string,
     password: string,
   ): Promise<Omit<User, 'password'> | null> {
-    try {
       await this.checkLoginAttempts(email);
 
       const user = await this.usersService.findByEmail(email);
@@ -80,18 +80,9 @@ export class AuthService {
       await this.resetLoginAttempts(email);
       const { password: _, ...result } = user;
       return result;
-    } catch (error) {
-      if (error instanceof ForbiddenException) {
-        throw error;
-      }
-      throw new InternalServerErrorException(
-        ERROR_MESSAGES.INVALID_CREDENTIALS,
-      );
-    }
   }
 
   async login(loginDto: LoginDto): Promise<AuthResponseDto> {
-    try {
       const user = await this.validateUser(loginDto.email, loginDto.password);
       if (!user) {
         throw new UnauthorizedException(ERROR_MESSAGES.INVALID_CREDENTIALS);
@@ -107,21 +98,11 @@ export class AuthService {
         refreshToken,
         user: await this.mapUserToResponse(user),
       };
-    } catch (error) {
-      if (
-        error instanceof UnauthorizedException ||
-        error instanceof ForbiddenException
-      ) {
-        throw error;
-      }
-      throw new InternalServerErrorException(ERROR_MESSAGES.LOGIN_FAILED);
-    }
   }
 
   async refreshToken(
     refreshTokenDto: RefreshTokenDto,
   ): Promise<AuthResponseDto> {
-    try {
       const payload = await this.jwtService.verifyAsync(
         refreshTokenDto.refreshToken,
         {
@@ -129,13 +110,13 @@ export class AuthService {
         },
       );
 
-      if (payload.type !== 'refresh') {
+      if (payload.type !== TypeToken.REFRESH) {
         throw new BadRequestException(ERROR_MESSAGES.INVALID_TOKEN);
       }
 
       const user = await this.usersService.findById(payload.sub);
       if (!user) {
-        throw new UnauthorizedException(ERROR_MESSAGES.userNotFound);
+        throw new UnauthorizedException(ERROR_MESSAGES.USER_NOT_FOUND);
       }
 
       const isValid = await this.refreshTokenService.validateRefreshToken(
@@ -166,33 +147,20 @@ export class AuthService {
         refreshToken,
         user: await this.mapUserToResponse(user),
       };
-    } catch (error) {
-      if (
-        error instanceof UnauthorizedException ||
-        error instanceof BadRequestException
-      ) {
-        throw error;
-      }
-      throw new UnauthorizedException(ERROR_MESSAGES.INVALID_TOKEN);
-    }
   }
 
   async logout(refreshToken: string): Promise<void> {
-    try {
-      const payload = await this.jwtService.verifyAsync(
-        refreshToken,
-        {
-          secret: this.configService.get<string>('jwt.secretRefreshToken'),
-        },
-      );
+      const payload = await this.jwtService.verifyAsync(refreshToken, {
+        secret: this.configService.get<string>('jwt.secretRefreshToken'),
+      });
 
-      if (payload.type !== 'refresh') {
+      if (payload.type !== TypeToken.REFRESH) {
         throw new BadRequestException(ERROR_MESSAGES.INVALID_TOKEN);
       }
 
       const user = await this.usersService.findById(payload.sub);
       if (!user) {
-        throw new UnauthorizedException(ERROR_MESSAGES.userNotFound);
+        throw new UnauthorizedException(ERROR_MESSAGES.USER_NOT_FOUND);
       }
 
       const isValid = await this.refreshTokenService.validateRefreshToken(
@@ -212,12 +180,6 @@ export class AuthService {
         throw new UnauthorizedException(ERROR_MESSAGES.INVALID_TOKEN);
       }
       await this.refreshTokenService.deleteRefreshToken(refreshToken);
-    } catch (error) {
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
-      throw new InternalServerErrorException(ERROR_MESSAGES.LOGOUT_FAILED);
-    }
   }
 
   async changePassword(
@@ -225,15 +187,16 @@ export class AuthService {
     oldPassword: string,
     newPassword: string,
   ): Promise<void> {
-    try {
       const user = await this.usersService.findById(userId);
       if (!user) {
-        throw new UnauthorizedException(ERROR_MESSAGES.userNotFound);
+        throw new UnauthorizedException(ERROR_MESSAGES.USER_NOT_FOUND);
       }
 
       const isPasswordValid = await bcrypt.compare(oldPassword, user.password);
       if (!isPasswordValid) {
-        throw new UnauthorizedException(ERROR_MESSAGES.isCurrentPasswordWrong);
+        throw new UnauthorizedException(
+          ERROR_MESSAGES.IS_CURRENT_PASSWORD_WRONG,
+        );
       }
 
       const hashedPassword = await bcrypt.hash(
@@ -241,20 +204,19 @@ export class AuthService {
         this.PASSWORD_SALT_ROUNDS,
       );
       await this.usersService.updatePassword(userId, hashedPassword);
-    } catch (error) {
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
-      throw new InternalServerErrorException(ERROR_MESSAGES.CHANGE_PASSWORD_FAILED);
-    }
   }
 
-  private async generateAccessToken(user: Omit<User, 'password'>): Promise<string> {
+  private async generateAccessToken(
+    user: Omit<User, 'password'>,
+  ): Promise<string> {
     const payload: UserResponseDto = {
+      type: TypeToken.ACCESS,
       id: user.id,
       email: user.email,
       fullname: user.fullname,
-      permissions: await this.permissionService.getPermissionsNameByUserId(user.id),
+      permissions: await this.permissionService.getPermissionsNameByUserId(
+        user.id,
+      ),
     };
     return this.jwtService.signAsync(payload, {
       secret: this.configService.get<string>('jwt.secret'),
@@ -262,10 +224,12 @@ export class AuthService {
     });
   }
 
-  private async generateRefreshToken(user: Omit<User, 'password'>): Promise<string> {
+  private async generateRefreshToken(
+    user: Omit<User, 'password'>,
+  ): Promise<string> {
     const payload = {
       sub: user.id,
-      type: 'refresh',
+      type: TypeToken.REFRESH,
     };
 
     const refreshToken = await this.jwtService.signAsync(payload, {
@@ -277,12 +241,17 @@ export class AuthService {
     return refreshToken;
   }
 
-  private async mapUserToResponse(user: Omit<User, 'password'>): Promise<UserResponseDto> {
+  private async mapUserToResponse(
+    user: Omit<User, 'password'>,
+  ): Promise<UserResponseDto> {
     return {
       id: user.id,
       email: user.email,
       fullname: user.fullname,
-      permissions: await this.permissionService.getPermissionsNameByUserId(user.id),
+      permissions: await this.permissionService.getPermissionsNameByUserId(
+        user.id,
+      ),
+      type: TypeToken.ACCESS,
     };
   }
 }

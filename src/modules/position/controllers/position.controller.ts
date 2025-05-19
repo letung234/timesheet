@@ -8,6 +8,7 @@ import {
   Delete,
   UseGuards,
   Request,
+  HttpStatus,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../../auth/guards/permissions.guard';
@@ -24,35 +25,59 @@ export class PositionController {
 
   @Post()
   @RequirePermissions(Permission.CREATE_POSITION)
-  create(@Request() req, @Body() createPositionDto: CreatePositionDto) {
-    return this.positionService.create(req.user.id, createPositionDto);
+  async create(@Request() req, @Body() createPositionDto: CreatePositionDto) {
+    const data = await this.positionService.create(req.user.id, createPositionDto);
+    return {
+      message: 'Position created successfully',
+      data,
+      statusCode: HttpStatus.OK,
+    };
   }
 
   @Get()
   @RequirePermissions(Permission.READ_POSITION)
-  findAll() {
-    return this.positionService.findAll();
+  async findAll() {
+    const data = await this.positionService.findAll();
+    return {
+      message: 'Positions retrieved successfully',
+      data,
+      statusCode: HttpStatus.OK,
+    };
   }
 
   @Get(':id')
   @RequirePermissions(Permission.READ_POSITION)
-  findOne(@Param('id') id: string) {
-    return this.positionService.findOne(+id);
+  async findOne(@Param('id') id: string) {
+    const data = await this.positionService.findOne(+id);
+    return {
+      message: 'Position retrieved successfully',
+      data,
+      statusCode: HttpStatus.OK,
+    };
   }
 
   @Patch(':id')
   @RequirePermissions(Permission.UPDATE_POSITION)
-  update(
+  async update(
     @Request() req,
     @Param('id') id: string,
     @Body() updatePositionDto: UpdatePositionDto,
   ) {
-    return this.positionService.update(req.user.id, +id, updatePositionDto);
+    const data = await this.positionService.update(req.user.id, +id, updatePositionDto);
+    return {
+      message: 'Position updated successfully',
+      data,
+      statusCode: HttpStatus.OK,
+    };
   }
 
   @Delete(':id')
   @RequirePermissions(Permission.DELETE_POSITION)
-  remove(@Request() req, @Param('id') id: string) {
-    return this.positionService.remove(req.user.id, +id);
+  async remove(@Request() req, @Param('id') id: string) {
+    await this.positionService.remove(req.user.id, +id);
+    return {
+      message: 'Position deleted successfully',
+      statusCode: HttpStatus.OK,
+    };
   }
 }

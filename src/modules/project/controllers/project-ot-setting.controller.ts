@@ -8,6 +8,7 @@ import {
   Delete,
   UseGuards,
   Request,
+  HttpStatus,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RequirePermissions } from '../../auth/decorators/require-permissions.decorator';
@@ -25,41 +26,60 @@ export class ProjectOtSettingController {
 
   @Post()
   @RequirePermissions(Permission.CREATE_PROJECT)
-  create(
+  async create(
     @Request() req,
     @Param('projectCode') projectCode: string,
     @Body() createProjectOtSettingDto: CreateProjectOtSettingDto,
   ) {
-    return this.projectOtSettingService.create(
+    const data = await this.projectOtSettingService.create(
       req.user.id,
       projectCode,
       createProjectOtSettingDto,
     );
+    return {
+      message: 'Project OT setting created successfully',
+      data,
+      statusCode: HttpStatus.OK,
+    };
   }
 
   @Get()
   @RequirePermissions(Permission.READ_PROJECT)
-  findOne(@Param('projectCode') projectCode: string) {
-    return this.projectOtSettingService.findOne(projectCode);
+  async findOne(@Param('projectCode') projectCode: string) {
+    const data = await this.projectOtSettingService.findOne(projectCode);
+    return {
+      message: 'Project OT setting retrieved successfully',
+      data,
+      statusCode: HttpStatus.OK,
+    };
   }
 
   @Patch()
   @RequirePermissions(Permission.UPDATE_PROJECT)
-  update(
+  async update(
     @Request() req,
     @Param('projectCode') projectCode: string,
     @Body() updateProjectOtSettingDto: UpdateProjectOtSettingDto,
   ) {
-    return this.projectOtSettingService.update(
+    const data = await this.projectOtSettingService.update(
       req.user.id,
       projectCode,
       updateProjectOtSettingDto,
     );
+    return {
+      message: 'Project OT setting updated successfully',
+      data,
+      statusCode: HttpStatus.OK,
+    };
   }
 
   @Delete()
   @RequirePermissions(Permission.DELETE_PROJECT)
-  remove(@Param('projectCode') projectCode: string) {
-    return this.projectOtSettingService.remove(projectCode);
+  async remove(@Param('projectCode') projectCode: string) {
+    await this.projectOtSettingService.remove(projectCode);
+    return {
+      message: 'Project OT setting deleted successfully',
+      statusCode: HttpStatus.OK,
+    };
   }
 }

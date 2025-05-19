@@ -25,25 +25,45 @@ export class PermissionController {
   @Post()
   @RequirePermissions(Permission.MANAGE_PERMISSIONS)
   async create(@Body() createPermissionDto: CreatePermissionDto) {
-    return this.permissionService.create(createPermissionDto);
+    const data = await this.permissionService.create(createPermissionDto);
+    return {
+      message: 'Create permission successfully',
+      data,
+      statusCode: HttpStatus.OK,
+    };
   }
 
   @Get()
   @RequirePermissions(Permission.MANAGE_PERMISSIONS)
   async findAll() {
-    return this.permissionService.findAll();
+    const data = await this.permissionService.findAll();
+    return {
+      message: 'Get permissions successfully',
+      data,
+      statusCode: HttpStatus.OK,
+    };
   }
 
   @Get(':id')
   @RequirePermissions(Permission.MANAGE_PERMISSIONS)
   async findOne(@Param('id') id: string) {
-    return this.permissionService.findOne(+id);
+    const data = await this.permissionService.findOne(+id);
+    return {
+      message: 'Get permission by id successfully',
+      data,
+      statusCode: HttpStatus.OK,
+    };
   }
 
   @Get('name/:name')
   @RequirePermissions(Permission.MANAGE_PERMISSIONS)
   async findByName(@Param('name') name: string) {
-    return this.permissionService.findByName(name);
+    const data = await this.permissionService.findByName(name);
+    return {
+      message: 'Get permission by name successfully',
+      data,
+      statusCode: HttpStatus.OK,
+    };
   }
 
   @Patch(':id')
@@ -52,7 +72,12 @@ export class PermissionController {
     @Param('id') id: string,
     @Body() updatePermissionDto: UpdatePermissionDto,
   ) {
-    return this.permissionService.update(+id, updatePermissionDto);
+    const data = await this.permissionService.update(+id, updatePermissionDto);
+    return {
+      message: 'Update permission successfully',
+      data,
+      statusCode: HttpStatus.OK,
+    };
   }
 
   @Delete(':id')
@@ -60,17 +85,31 @@ export class PermissionController {
   @RequirePermissions(Permission.MANAGE_PERMISSIONS)
   async remove(@Param('id') id: string) {
     await this.permissionService.remove(+id);
+    return {
+      message: 'Delete permission successfully',
+      statusCode: HttpStatus.OK,
+    };
   }
 
   @Get('role/:roleId')
   @RequirePermissions(Permission.MANAGE_ROLES)
   async getPermissionsByRoleId(@Param('roleId') roleId: string) {
-    return this.permissionService.getPermissionsByRoleId(+roleId);
+    const data = await this.permissionService.getPermissionsByRoleId(+roleId);
+    return {
+      message: 'Get permissions by role id successfully',
+      data,
+      statusCode: HttpStatus.OK,
+    };
   }
 
   @Get('user/:userId')
   @RequirePermissions(Permission.MANAGE_USER_ROLES)
   async getPermissionsByUserId(@Param('userId') userId: string) {
-    return this.permissionService.getPermissionsByUserId(+userId);
+    const data = await this.permissionService.getPermissionsByUserId(+userId);
+    return {
+      message: 'Get permissions by user id successfully',
+      data,
+      statusCode: HttpStatus.OK,
+    };
   }
 }

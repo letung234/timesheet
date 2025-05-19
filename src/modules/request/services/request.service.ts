@@ -134,7 +134,7 @@ export class RequestService {
       !(await this.isProjectManager(userId, request.project_id)) &&
       !(await this.isProjectAdmin(userId, request.project_id))
     ) {
-      throw new ForbiddenException(ERROR_MESSAGES.insufficientPermissions);
+      throw new ForbiddenException(ERROR_MESSAGES.INSUFFICIENT_PERMISSIONS);
     }
 
     return request;

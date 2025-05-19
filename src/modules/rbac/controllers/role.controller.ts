@@ -26,25 +26,45 @@ export class RoleController {
   @Post()
   @RequirePermissions(Permission.MANAGE_ROLES)
   async create(@Body() createRoleDto: CreateRoleDto) {
-    return this.roleService.create(createRoleDto);
+    const data = await this.roleService.create(createRoleDto);
+    return {
+      message: 'Create role successfully',
+      data,
+      statusCode: HttpStatus.OK,
+    };
   }
 
   @Get()
   @RequirePermissions(Permission.MANAGE_ROLES)
   async findAll() {
-    return this.roleService.findAll();
+    const data = await this.roleService.findAll();
+    return {
+      message: 'Get roles successfully',
+      data,
+      statusCode: HttpStatus.OK,
+    };
   }
 
   @Get(':id')
   @RequirePermissions(Permission.MANAGE_ROLES)
   async findOne(@Param('id') id: string) {
-    return this.roleService.findOne(+id);
+    const data = await this.roleService.findOne(+id);
+    return {
+      message: 'Get role by id successfully',
+      data,
+      statusCode: HttpStatus.OK,
+    };
   }
 
   @Patch(':id')
   @RequirePermissions(Permission.MANAGE_ROLES)
   async update(@Param('id') id: string, @Body() updateRoleDto: UpdateRoleDto) {
-    return this.roleService.update(+id, updateRoleDto);
+    const data = await this.roleService.update(+id, updateRoleDto);
+    return {
+      message: 'Update role successfully',
+      data,
+      statusCode: HttpStatus.OK,
+    };
   }
 
   @Delete(':id')
@@ -52,6 +72,10 @@ export class RoleController {
   @RequirePermissions(Permission.MANAGE_ROLES)
   async remove(@Param('id') id: string) {
     await this.roleService.remove(+id);
+    return {
+      message: 'Delete role successfully',
+      statusCode: HttpStatus.OK,
+    };
   }
 
   @Post(':id/permissions')
@@ -60,13 +84,22 @@ export class RoleController {
     @Param('id') id: string,
     @Body() assignPermissionsDto: AssignPermissionsDto,
   ) {
-    return this.roleService.assignPermissions(+id, assignPermissionsDto);
+    await this.roleService.assignPermissions(+id, assignPermissionsDto);
+    return {
+      message: 'Assign permissions to role successfully',
+      statusCode: HttpStatus.OK,
+    };
   }
 
   @Get('user/:userId')
   @RequirePermissions(Permission.MANAGE_USER_ROLES)
   async getUserRoles(@Param('userId') userId: string) {
-    return this.roleService.getUserRoles(+userId);
+    const data = await this.roleService.getUserRoles(+userId);
+    return {
+      message: 'Get user roles successfully',
+      data,
+      statusCode: HttpStatus.OK,
+    };
   }
 
   @Post('user/:userId/role/:roleId')
@@ -77,6 +110,10 @@ export class RoleController {
     @Param('roleId') roleId: string,
   ) {
     await this.roleService.assignRoleToUser(+userId, +roleId);
+    return {
+      message: 'Assign role to user successfully',
+      statusCode: HttpStatus.OK,
+    };
   }
 
   @Delete('user/:userId/role/:roleId')
@@ -87,5 +124,9 @@ export class RoleController {
     @Param('roleId') roleId: string,
   ) {
     await this.roleService.removeRoleFromUser(+userId, +roleId);
+    return {
+      message: 'Remove role from user successfully',
+      statusCode: HttpStatus.OK,
+    };
   }
 }

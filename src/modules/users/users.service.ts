@@ -29,7 +29,8 @@ export class UsersService {
 
   async create(dto: CreateUserDto): Promise<User> {
     const exists = await this.userRepo.findOne({ where: { email: dto.email } });
-    if (exists) throw new ConflictException(ERROR_MESSAGES.emailAlreadyExists);
+    if (exists)
+      throw new ConflictException(ERROR_MESSAGES.EMAIL_ALREADY_EXISTS);
 
     const hashed = await bcrypt.hash(dto.password, 10);
     const user = this.userRepo.create({
@@ -79,7 +80,7 @@ export class UsersService {
       where: { id },
       relations: ['userRoles', 'userRoles.role'],
     });
-    if (!user) throw new NotFoundException(ERROR_MESSAGES.userNotFound);
+    if (!user) throw new NotFoundException(ERROR_MESSAGES.USER_NOT_FOUND);
     return user;
   }
 
@@ -88,7 +89,7 @@ export class UsersService {
       where: { email },
       relations: ['userRoles', 'userRoles.role'],
     });
-    if (!user) throw new NotFoundException(ERROR_MESSAGES.userNotFound);
+    if (!user) throw new NotFoundException(ERROR_MESSAGES.USER_NOT_FOUND);
     return user;
   }
 
@@ -100,7 +101,7 @@ export class UsersService {
         where: { email: dto.email },
       });
       if (exists)
-        throw new ConflictException(ERROR_MESSAGES.emailAlreadyExists);
+        throw new ConflictException(ERROR_MESSAGES.EMAIL_ALREADY_EXISTS);
     }
 
     if (dto.avatar) {
@@ -124,13 +125,11 @@ export class UsersService {
     await this.userRepo.softRemove(user);
   }
 
-
   async updatePassword(userId: number, hashedPassword: string): Promise<void> {
     const user = await this.findById(userId);
     user.password = hashedPassword;
     await this.userRepo.save(user);
   }
-
 
   async removeRole(userId: number, roleId: number): Promise<void> {
     const userRole = await this.userRoleRepository.findOne({
@@ -138,12 +137,11 @@ export class UsersService {
     });
 
     if (!userRole) {
-      throw new NotFoundException(ERROR_MESSAGES.userNotFound);
+      throw new NotFoundException(ERROR_MESSAGES.USER_NOT_FOUND);
     }
 
     await this.userRoleRepository.remove(userRole);
   }
-
 
   async toggleActive(id: number): Promise<User> {
     const user = await this.findById(id);

@@ -8,6 +8,7 @@ import {
   Delete,
   UseGuards,
   Request,
+  HttpStatus,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RequirePermissions } from '../../auth/decorators/require-permissions.decorator';
@@ -23,35 +24,59 @@ export class CustomerController {
 
   @Post()
   @RequirePermissions(Permission.CREATE_CUSTOMER)
-  create(@Request() req, @Body() createCustomerDto: CreateCustomerDto) {
-    return this.customerService.create(req.user.id, createCustomerDto);
+  async create(@Request() req, @Body() createCustomerDto: CreateCustomerDto) {
+    const data = await this.customerService.create(req.user.id, createCustomerDto);
+    return {
+      message: 'Create customer successfully',
+      data,
+      statusCode: HttpStatus.OK,
+    };
   }
 
   @Get()
   @RequirePermissions(Permission.READ_CUSTOMER)
-  findAll() {
-    return this.customerService.findAll();
+  async findAll() {
+    const data = await this.customerService.findAll();
+    return {
+      message: 'Get customers successfully',
+      data,
+      statusCode: HttpStatus.OK,
+    };
   }
 
   @Get(':id')
   @RequirePermissions(Permission.READ_CUSTOMER)
-  findOne(@Param('id') id: string) {
-    return this.customerService.findOne(+id);
+  async findOne(@Param('id') id: string) {
+    const data = await this.customerService.findOne(+id);
+    return {
+      message: 'Get customer successfully',
+      data,
+      statusCode: HttpStatus.OK,
+    };
   }
 
   @Patch(':id')
   @RequirePermissions(Permission.UPDATE_CUSTOMER)
-  update(
+  async update(
     @Request() req,
     @Param('id') id: string,
     @Body() updateCustomerDto: UpdateCustomerDto,
   ) {
-    return this.customerService.update(req.user.id, +id, updateCustomerDto);
+    const data = await this.customerService.update(req.user.id, +id, updateCustomerDto);
+    return {
+      message: 'Update customer successfully',
+      data,
+      statusCode: HttpStatus.OK,
+    };
   }
 
   @Delete(':id')
   @RequirePermissions(Permission.DELETE_CUSTOMER)
-  remove(@Request() req, @Param('id') id: string) {
-    return this.customerService.remove(req.user.id, +id);
+  async remove(@Request() req, @Param('id') id: string) {
+    await this.customerService.remove(req.user.id, +id);
+    return {
+      message: 'Delete customer successfully',
+      statusCode: HttpStatus.OK,
+    };
   }
 }

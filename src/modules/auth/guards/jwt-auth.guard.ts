@@ -36,7 +36,9 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     status?: any,
   ): TUser {
     if (err || !user) {
-      throw err || new UnauthorizedException(ERROR_MESSAGES.invalidCredentials);
+      throw (
+        err || new UnauthorizedException(ERROR_MESSAGES.INVALID_CREDENTIALS)
+      );
     }
     return user as TUser;
   }
