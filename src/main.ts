@@ -3,7 +3,6 @@ import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { StandardResponseInterceptor } from '~/common/interceptors/standard-response.interceptor';
 import {
-  ValidationExceptionFilter,
   DatabaseExceptionFilter,
   HttpExceptionFilter,
   NonHttpExceptionFilter,
@@ -51,8 +50,7 @@ async function bootstrap(): Promise<void> {
 
   // Apply global exception filters in order of specificity
   app.useGlobalFilters(
-    new ValidationExceptionFilter(), // Handle validation errors first
-    new DatabaseExceptionFilter(), // Then handle database errors
+    new DatabaseExceptionFilter(), // First handle database errors
     new HttpExceptionFilter(), // Then handle HTTP exceptions
     new NonHttpExceptionFilter(), // Finally handle any other errors
   );
