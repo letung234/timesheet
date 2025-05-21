@@ -15,11 +15,21 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
     const status = exception.getStatus();
-    const message =
-      typeof exception.getResponse() === 'string'
-        ? exception.getResponse()
-        : exception.message || 'Unexpected error';
-    const error = HttpStatus[status] || 'Error';
+    const exceptionResponse = exception.getResponse();
+
+    let message = 'Unexpected error';
+    let error = HttpStatus[status] || 'Error';
+    let errorList = null;
+
+    if (typeof exceptionResponse === 'string') {
+      message = exceptionResponse;
+    } else if (typeof exceptionResponse === 'object') {
+      const responseObj = exceptionResponse as any;
+      message = responseObj.message || exception.message || message;
+      error = responseObj.error || error;
+      errorList = responseObj.errorList || null;
+    }
+
     const errorResponse = {
       [ERROR_RESPONSE_KEYS.STATUS_CODE]: status,
       [ERROR_RESPONSE_KEYS.TIMESTAMP]: new Date().toISOString(),
@@ -27,8 +37,10 @@ export class HttpExceptionFilter implements ExceptionFilter {
       [ERROR_RESPONSE_KEYS.METHOD]: request.method,
       [ERROR_RESPONSE_KEYS.MESSAGE]: message,
       [ERROR_RESPONSE_KEYS.ERROR]: error,
+      ...(errorList && typeof errorList === 'object' ? { errorList } : {}),
       ...(process.env.NODE_ENV !== 'production' && { debug: exception.stack }),
     };
+
     response.status(status).json(errorResponse);
   }
 }

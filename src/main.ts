@@ -1,6 +1,5 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ValidationPipe } from '@nestjs/common';
 import { StandardResponseInterceptor } from '~/common/interceptors/standard-response.interceptor';
 import {
   DatabaseExceptionFilter,
@@ -12,6 +11,7 @@ import helmet from 'helmet';
 import * as rateLimit from 'express-rate-limit';
 import { ERROR_MESSAGES } from '~/common/constants/error.constants';
 import { LoggingInterceptor } from '~/common/interceptors/logging.interceptor';
+import { CustomValidationPipe } from './common/pipes/validation.pipe';
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
@@ -19,13 +19,7 @@ async function bootstrap(): Promise<void> {
   const port = configService.get<number>('app.port') || 3000;
   const url_client = configService.get<number>('app.url_client');
 
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,
-      forbidNonWhitelisted: true,
-      transform: true,
-    }),
-  );
+  app.useGlobalPipes(new CustomValidationPipe());
 
   app.enableCors({
     origin: [url_client || '*'],
